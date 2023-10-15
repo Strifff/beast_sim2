@@ -168,7 +168,7 @@ impl Beast {
         self.location.1 += self.speed * self.direction.sin();
     }
 
-    pub fn step(&mut self, world: &Vec<Entity>) {
+    pub fn step(&mut self, world: &Rc<RefCell<Vec<Entity>>>) {
         self.memory_forget();
 
         self.move_randomly();

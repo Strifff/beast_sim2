@@ -180,7 +180,7 @@ impl World {
         let beast_entity = Entity::Beast(Rc::new(RefCell::new(beast)));
         self.add_entity(beast_entity);
     }
-    
+
     pub fn step(&mut self) {
         let entities = self.entities.borrow();
         for entity in entities.iter() {
@@ -191,10 +191,9 @@ impl World {
                 }
                 Entity::Beast(beast) => {
                     let mut beast = beast.borrow_mut();
-                    //beast.step(&self.entities);
+                    beast.step(&self.entities);
                 }
             }
         }
-        
     }
 }
