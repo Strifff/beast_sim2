@@ -5,7 +5,7 @@ use std::{
 };
 
 use crate::environment::beast::{Beast, BeastType};
-use crate::environment::world::{Entity, World};
+use crate::environment::world::{Entity, World, Plant};
 
 pub struct Animator {
     width: usize,
@@ -40,50 +40,44 @@ impl Animator {
         }
     }
 
+    fn safe_buffer(&mut self, x: usize, y: usize, color: u32) {
+        if x < self.width && y < self.height {
+            self.buffer[x + y * self.width] = color;
+        }
+    }
+
     fn draw_circle(&mut self, x: usize, y: usize, radius: usize, color: u32) {
-        let mut x = x as isize + radius as isize - 1;
-        let mut y = y as isize;
-        let mut x_usize = x as usize;
-        let mut y_usize = y as usize;
-        let mut dx = 1;
-        let mut dy = 1;
-        let mut err = dx - radius/2;
-    
-        while x_usize >= y_usize {
-            self.buffer[x_usize + y_usize * self.width] = color;
-            self.buffer[y_usize + x_usize * self.width] = color;
-            self.buffer[x_usize + y_usize * self.width] = color;
-            self.buffer[y_usize + x_usize * self.width] = color;
-            self.buffer[x_usize + y_usize * self.width] = color;
-            self.buffer[y_usize + x_usize * self.width] = color;
-            self.buffer[x_usize + y_usize * self.width] = color;
-            self.buffer[y_usize + x_usize * self.width] = color;
-    
-            if err <= 0 {
-                y += 1;
-                y_usize = y as usize;
-                err += dy;
-                dy += 2;
+        // Bresenham's Circle Drawing Algorithm
+        let x = x as isize;
+        let y = y as isize;
+        let radius = radius as isize;
+        let mut x1 = 0;
+        let mut y1 = radius;
+        let mut p = 3 - 2 * radius;
+
+        while x1 <= y1 {
+            for i in x - x1..x + x1 {
+                self.safe_buffer(i as usize, (y-y1) as usize, color);
+                self.safe_buffer(i as usize, (y+y1) as usize, color)
             }
-    
-            if err > 0 {
-                x -= 1;
-                x_usize = x as usize;
-                dx += 2;
-                err += dx - radius/2;
+
+            for i in x - y1..x + y1 {
+                self.safe_buffer(i as usize, (y-x1) as usize, color);
+                self.safe_buffer(i as usize, (y+x1) as usize, color);
+            }
+
+            x1 += 1;
+
+            if p < 0 {
+                p = p + 4 * x1 + 6;
+            } else {
+                y1 -= 1;
+                p = p + 4 * (x1 - y1) + 10;
             }
         }
     }
-    
-    fn draw_cone(
-        &mut self,
-        x: usize,
-        y: usize,
-        radius: f64,
-        fov: f64,
-        direction: f64,
-        color: u32,
-    ) {
+
+    fn draw_cone(&mut self, x: usize, y: usize, radius: f64, fov: f64, direction: f64, color: u32) {
         let dir = direction / 180 as f64 * std::f64::consts::PI;
         let left_bound = dir - fov / 2.0;
         let right_bound = dir + fov / 2.0;
@@ -102,8 +96,9 @@ impl Animator {
                     && (y + j).round() >= 0.0
                     && (y + j).round() < self.height as f64
                 {
-                    self.buffer[(x + i).round() as usize
-                        + ((y + j).round() as usize) * self.width] = color;
+                    self.buffer
+                        [(x + i).round() as usize + ((y + j).round() as usize) * self.width] =
+                        color;
                 }
             }
         }
@@ -128,19 +123,20 @@ impl Animator {
         }
     }
 
-    pub fn step(&mut self, world: &World, delay: Duration) {
-        let earlier = Instant::now();
+    fn draw_plant(&mut self, plant: &Plant) {
+        if plant.sprouted {
+            self.draw_circle(plant.x as usize, plant.y as usize, 5, 0x00ff00); // Set the pixel to green
+        }
+    }
+
+    pub fn step(&mut self, world: &World, delay: Duration, earlier: Instant) {
         // Clear the buffer
         self.clear_buffer(0xFFFFFF);
 
         // Draw the world
         for entity in world.entities.iter() {
             match entity {
-                Entity::Plant(plant) => {
-                    let x = plant.location.0 as usize;
-                    let y = plant.location.1 as usize;
-                    self.draw_circle(x, y, 3, 0x00FF00); // Set the pixel to green
-                }
+                Entity::Plant(plant) => self.draw_plant(plant),
                 Entity::Beast(beast) => self.draw_beast(beast),
             }
         }
