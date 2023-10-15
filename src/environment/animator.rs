@@ -5,7 +5,7 @@ use std::{
 };
 
 use crate::environment::beast::{Beast, BeastType};
-use crate::environment::world::{Entity, Plant, World};
+use crate::environment::world::{Entity, World};
 
 pub struct Animator {
     width: usize,
@@ -16,7 +16,7 @@ pub struct Animator {
 
 impl Animator {
     pub fn new(width: usize, height: usize) -> Self {
-        let mut buffer: Vec<u32> = vec![0; width * height];
+        let buffer: Vec<u32> = vec![0; width * height];
         let window = Window::new("Beast simulator", width, height, WindowOptions::default())
             .unwrap_or_else(|e| {
                 panic!("{}", e);
@@ -75,9 +75,6 @@ impl Animator {
         }
     }
     
-    
-    
-
     fn draw_cone(
         &mut self,
         x: usize,

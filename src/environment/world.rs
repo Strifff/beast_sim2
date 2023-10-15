@@ -1,9 +1,9 @@
 use crate::environment::animator::Animator;
 use crate::environment::beast::{Beast, BeastType};
 
-use rand::{rngs::ThreadRng, thread_rng, Rng};
+use rand::{thread_rng, Rng};
 
-use super::beast;
+
 
 #[derive(PartialEq)]
 pub enum Entity {
@@ -68,7 +68,7 @@ impl World {
         self.entities.clear();
     }
 
-    pub fn restart_world(&mut self, plants: usize, herbivores: usize, carnivores: usize) {
+    pub fn restart_world(&mut self, _plants: usize, herbivores: usize, carnivores: usize) {
         let mut rng = thread_rng();
         self.clear_world();
         for _ in 0..herbivores {
@@ -95,7 +95,7 @@ impl World {
     pub fn step(&mut self) {
         for entity in self.entities.iter_mut() {
             match entity {
-                Entity::Plant(plant) => {
+                Entity::Plant(_plant) => {
                     //plant.step();
                 }
                 Entity::Beast(beast) => {

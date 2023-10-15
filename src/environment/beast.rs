@@ -26,7 +26,7 @@ impl Beast {
         let age = 0.0;
         let fov = 90.0/ 180.0 * std::f64::consts::PI;
         let sight_range = 25.0;
-        let mut rng: ThreadRng = thread_rng();
+        let _rng: ThreadRng = thread_rng();
 
         Self {
             beast_type,

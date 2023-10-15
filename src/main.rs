@@ -1,9 +1,8 @@
 extern crate tch;
-use minifb::{Key, Window, WindowOptions};
-use rand::{rngs::ThreadRng, thread_rng, Rng};
+
+
 use std::{
-    thread,
-    time::{Duration, Instant},
+    time::{Duration},
 };
 
 mod environment {
@@ -44,7 +43,7 @@ fn main() {
             }
         }
     } else {
-        'train_loop: while true {
+        'train_loop: loop {
             // Init the world
             world.restart_world(PLANT_START, HERBI_START, CARNI_START);
             'simulate_loop: while world.continue_simulation(None) {
