@@ -1,6 +1,9 @@
 use rand::{rngs::ThreadRng, thread_rng, Rng};
 
-use super::world::{Entity, World};
+use super::world::{Entity, World, Plant};
+
+use std::cell::RefCell;
+use std::rc::Rc;
 
 #[derive(PartialEq)]
 pub struct Beast {
@@ -56,20 +59,22 @@ impl Beast {
             }
         }
     }
-    pub fn plant_in_view(&self, plant: &super::world::Plant) -> bool {
+    pub fn plant_in_view(&self, plant: &Rc<RefCell<Plant>>) -> bool {
         let x = self.location.0;
         let y = self.location.1;
-        let plant_x = plant.x;
-        let plant_y = plant.y;
+        let plant_borrow = plant.borrow();
+        let plant_x = plant_borrow.x;
+        let plant_y = plant_borrow.y;
         let dist = ((plant_x - x).powi(2) + (plant_y - y).powi(2)).sqrt();
         dist <= self.sight_range
     }
 
-    pub fn beast_in_view(&self, beast: &Beast) -> bool {
+    pub fn beast_in_view(&self, beast: &Rc<RefCell<Beast>>) -> bool {
         let x = self.location.0;
         let y = self.location.1;
-        let beast_x = beast.location.0;
-        let beast_y = beast.location.1;
+        let beast_borrow = beast.borrow();
+        let beast_x = beast_borrow.location.0;
+        let beast_y = beast_borrow.location.1;
         let dist = ((beast_x - x).powi(2) + (beast_y - y).powi(2)).sqrt();
         dist <= self.sight_range
     }
@@ -81,11 +86,12 @@ impl Beast {
         }
     }
 
-    pub fn plant_in_direction(&self, plant: &super::world::Plant) -> bool {
+    pub fn plant_in_direction(&self, plant: &Rc<RefCell<Plant>>) -> bool {
         let x = self.location.0;
         let y = self.location.1;
-        let plant_x = plant.x;
-        let plant_y = plant.y;
+        let plant_borrow = plant.borrow();
+        let plant_x = plant_borrow.x;
+        let plant_y = plant_borrow.y;
         let dist = ((plant_x - x).powi(2) + (plant_y - y).powi(2)).sqrt();
         let angle = (plant_y - y).atan2(plant_x - x);
         let left_bound = self.direction - self.fov / 2.0;
@@ -93,11 +99,12 @@ impl Beast {
         dist <= self.sight_range && (angle >= left_bound && angle <= right_bound)
     }
 
-    pub fn beast_in_direction(&self, beast: &Beast) -> bool {
+    pub fn beast_in_direction(&self, beast: &Rc<RefCell<Beast>>) -> bool {
         let x = self.location.0;
         let y = self.location.1;
-        let beast_x = beast.location.0;
-        let beast_y = beast.location.1;
+        let beast_borrow = beast.borrow();
+        let beast_x = beast_borrow.location.0;
+        let beast_y = beast_borrow.location.1;
         let dist = ((beast_x - x).powi(2) + (beast_y - y).powi(2)).sqrt();
         let angle = (beast_y - y).atan2(beast_x - x);
         let left_bound = self.direction - self.fov / 2.0;
@@ -112,20 +119,22 @@ impl Beast {
         }
     }
 
-    pub fn plant_in_range(&self, plant: &super::world::Plant, range: f64) -> bool {
+    pub fn plant_in_range(&self, plant: &Rc<RefCell<Plant>>, range: f64) -> bool {
         let x = self.location.0;
         let y = self.location.1;
-        let plant_x = plant.x;
-        let plant_y = plant.y;
+        let plant_borrow = plant.borrow();
+        let plant_x = plant_borrow.x;
+        let plant_y = plant_borrow.y;
         let dist = ((plant_x - x).powi(2) + (plant_y - y).powi(2)).sqrt();
         dist <= range
     }
 
-    pub fn beast_in_range(&self, beast: &Beast, range: f64) -> bool {
+    pub fn beast_in_range(&self, beast: &Rc<RefCell<Beast>>, range: f64) -> bool {
         let x = self.location.0;
         let y = self.location.1;
-        let beast_x = beast.location.0;
-        let beast_y = beast.location.1;
+        let beast_borrow = beast.borrow();
+        let beast_x = beast_borrow.location.0;
+        let beast_y = beast_borrow.location.1;
         let dist = ((beast_x - x).powi(2) + (beast_y - y).powi(2)).sqrt();
         dist <= range
     }

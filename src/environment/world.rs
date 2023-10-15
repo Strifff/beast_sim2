@@ -154,12 +154,18 @@ impl World {
             for y in 0..self.grid_size {
                 let grid_start_x = self.border as f64 + x as f64 * self.grid_sqaure_size_x;
                 let grid_start_y = self.border as f64 + y as f64 * self.grid_sqaure_size_y;
+
                 let plant = Plant::new(
                     (grid_start_x, grid_start_y),
                     (self.grid_sqaure_size_x, self.grid_sqaure_size_y),
                     self.sprout_rate,
                 );
-                self.add_entity(Entity::Plant(plant));
+
+                // You need to borrow the entities Vec mutably
+                //let mut entities = self.entities.borrow_mut();
+                //entities.push(Rc::new(RefCell::new(Entity::Plant(plant))));
+                let plant_entity = Entity::Plant(Rc::new(RefCell::new(plant)));
+                self.add_entity(plant_entity);
             }
         }
     }
@@ -171,21 +177,24 @@ impl World {
             self.border as f64 + rng.gen_range(0.0..self.height as f64),
         );
         let beast = Beast::new(beast_type, location, self.beast_memory_time);
-        self.add_entity(Entity::Beast(beast));
+        let beast_entity = Entity::Beast(Rc::new(RefCell::new(beast)));
+        self.add_entity(beast_entity);
     }
-
-    fn world_step_beast(&mut self, beast: &Beast) {}
-
+    
     pub fn step(&mut self) {
-        for entity in &mut self.entities {
+        let entities = self.entities.borrow();
+        for entity in entities.iter() {
             match entity {
                 Entity::Plant(plant) => {
+                    let mut plant = plant.borrow_mut();
                     plant.step();
                 }
                 Entity::Beast(beast) => {
-                    //self.world_step_beast(beast)
+                    let mut beast = beast.borrow_mut();
+                    //beast.step(&self.entities);
                 }
             }
         }
+        
     }
 }

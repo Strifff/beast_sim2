@@ -3,9 +3,13 @@ use std::{
     thread,
     time::{Duration, Instant},
 };
+use std::cell::RefCell;
+use std::rc::Rc;
 
 use crate::environment::beast::{Beast, BeastType};
 use crate::environment::world::{Entity, World, Plant};
+
+use super::beast;
 
 pub struct Animator {
     width: usize,
@@ -104,7 +108,8 @@ impl Animator {
         }
     }
 
-    fn draw_beast(&mut self, beast: &Beast) {
+    fn draw_beast(&mut self, beast: &Rc<RefCell<Beast>>) {
+        let beast = beast.borrow();
         let x = beast.location.0 as usize;
         let y = beast.location.1 as usize;
 
@@ -123,7 +128,8 @@ impl Animator {
         }
     }
 
-    fn draw_plant(&mut self, plant: &Plant) {
+    fn draw_plant(&mut self, plant: &Rc<RefCell<Plant>>) {
+        let plant = plant.borrow();
         if plant.sprouted {
             self.draw_circle(plant.x as usize, plant.y as usize, 5, 0x00ff00); // Set the pixel to green
         }
@@ -134,7 +140,8 @@ impl Animator {
         self.clear_buffer(0xFFFFFF);
 
         // Draw the world
-        for entity in world.entities.iter() {
+        let entities = world.entities.borrow();
+        for entity in entities.iter() {
             match entity {
                 Entity::Plant(plant) => self.draw_plant(plant),
                 Entity::Beast(beast) => self.draw_beast(beast),
